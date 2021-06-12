@@ -1,0 +1,92 @@
+---
+- name: Install git, apache, php and do firewall port opening and Selinux settings
+  hosts: hk
+  become: true
+  vars:
+    status: permissive
+  tasks:
+    - name: Change SELINUX in Permissive mode so things should work in less hardening
+      lineinfile:
+        path: /etc/selinux/config
+        regexp: '^SELINUX='
+        line: 'SELINUX={{ status }}'
+    - name: permit httpd traffic add port 443 to firewal-cmd
+      ansible.posix.firewalld:
+        service: https
+        permanent: yes
+        state: enabled
+    - name: Remove if epel-release already installed
+      dnf:
+        name: epel-release
+        state: absent
+    - name: Import a key from url to validate epel-release
+      rpm_key:
+        state: present
+        key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8   
+    - name: Intall the epel-release repo
+      dnf:
+        name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+        state: present
+    - name: Install remi release for php
+      dnf:
+       name: https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+       state: present
+       disable_gpg_check: yes
+    - name: install git module on Server
+      dnf:
+        name: git
+        state: present
+        update_cache: true
+    - name: Uninstall Apache web server if already installed
+      dnf:
+        name: httpd
+        state: absent
+        autoremove: yes
+    - name: Uninstall PHP and it's all required packages
+      dnf:
+        name: php.*
+        state: absent
+        autoremove: yes
+    - name: Reset module for php 7.4 just in case if any older version into repo
+      shell: dnf module reset php -y
+      # first attempt if dnf enable don't work then try to replace w/ dnf install
+    - name: Enable remi repo for php 7.4
+      shell: dnf module enable php:remi-7.4 -y
+
+    - name: Install Apache web server 
+      dnf:
+        name: httpd
+        state: absent
+        autoremove: yes
+
+    - name: Install PHP and it's all required packages
+      dnf:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - php
+        - php-cli
+        - php-mysqlnd
+        - php-pdo
+        - php-mcrypt
+        - php-xml
+        - php-curl
+        - php-pear
+        - php-gd
+        - php-zip
+    - name: install wget to download other packages for manual installation
+      dnf:
+        name: wget
+        state: present
+    - name: Install composer for Laravel
+      shell: wget https://getcomposer.org/installer -O composer-installer.php 
+    - name: move composer to /usr/local/bin so it should executable
+      shell: php composer-installer.php --filename=composer --install-dir=/usr/local/bin 
+    - name: Start Apache Server
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+      # when: apache_config.changed
+    - debug: var=ansible_host
+

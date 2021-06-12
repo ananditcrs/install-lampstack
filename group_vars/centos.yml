@@ -1,0 +1,4 @@
+---
+#this one for AWS accounts to connect
+ansible_user: <your username>
+ansible_ssh_private_key_file: <yourcertificate file.cer>
