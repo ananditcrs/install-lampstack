@@ -31,7 +31,7 @@
       dnf:
        name: https://rpms.remirepo.net/enterprise/remi-release-8.rpm
        state: present
-       disable_gpg_check: yes
+       disable_gpg_check: yes 
     - name: install git module on Server
       dnf:
         name: git
@@ -52,7 +52,6 @@
       # first attempt if dnf enable don't work then try to replace w/ dnf install
     - name: Enable remi repo for php 7.4
       shell: dnf module enable php:remi-7.4 -y
-
     - name: Install Apache web server 
       dnf:
         name: httpd

@@ -1,0 +1,5 @@
+[awsservers]
+aws ansible_ssh_host=<your server ip>
+
+[hk]
+hk ansible_ssh_host=<your server ip>
