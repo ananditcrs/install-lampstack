@@ -12,3 +12,7 @@ choose your PHP version e.g. PHP 7.0, 7.1, 7.2, 7.3, 7.4
 Step 3:
 Just play your playbook
 
+e.g. ansible -m ping -i inventory/hosts aws  it should return "PONG" as success
+
+Run Playbook
+ansible-playbook -i inventory/hosts install-apache-php-centos8.yaml
