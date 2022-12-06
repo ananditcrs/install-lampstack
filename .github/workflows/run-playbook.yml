@@ -33,3 +33,4 @@ jobs:
       - name: Run a multi-line script
         run: |
           ansible --version
+          ansible-playbook -i inventory/hosts install-apache-php-centos8.yaml
